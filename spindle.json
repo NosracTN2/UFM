@@ -6,7 +6,7 @@
   "github": "https://github.com/NosracTN2/UFM",
   "homepage": "https://github.com/NosracTN2/UFM",
   "description": "Turns Ultimate Familiar Mastery into a playable RP. The extension owns every number (mana, tethers, XP, levels); the Tower narrator only reports what happened in a <ufm> change log.",
-  "permissions": ["interceptor", "generation", "chat_mutation", "ui_panels", "characters", "world_books"],
+  "permissions": ["interceptor", "generation", "chat_mutation", "ui_panels", "characters", "world_books", "decisions"],
   "entry_backend": "dist/backend.js",
   "entry_frontend": "dist/frontend.js",
   "minimum_lumiverse_version": "0.1.0",

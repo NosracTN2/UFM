@@ -4,6 +4,8 @@ import type { SpindleFrontendContext } from "lumiverse-spindle-types";
 import type { Client } from "./client";
 import { openLevelUp } from "./levelup";
 import { createPanel } from "./panel";
+import { installCheckUi, manualFix } from "./checks";
+import { mountSettings } from "./settings";
 import { openSetup } from "./setup";
 
 export const uiActions = {
@@ -41,7 +43,8 @@ export function mountPhaseUi(ctx: SpindleFrontendContext, client: Client): (() =
   };
 
   // The panel: right-edge dock (a bottom sheet on mobile); a drawer tab if ui_panels isn't granted.
-  const panel = createPanel(ctx, client, { openSetup: uiActions.openSetup, openLevelUp: uiActions.openLevelUp });
+  installCheckUi(ctx);
+  const panel = createPanel(ctx, client, { openSetup: uiActions.openSetup, openLevelUp: uiActions.openLevelUp, fixLast: () => void manualFix(ctx, client) });
   let dock: ReturnType<SpindleFrontendContext["ui"]["requestDockPanel"]> | null = null;
   try {
     dock = ctx.ui.requestDockPanel({ edge: "right", title: "Familiars", size: 360, minSize: 280, maxSize: 620, resizable: true, startCollapsed: false });
@@ -97,6 +100,7 @@ export function mountPhaseUi(ctx: SpindleFrontendContext, client: Client): (() =
     /* input bar unavailable */
   }
 
+  cleanups.push(...mountSettings(ctx, client));
   for (const m of mounts) cleanups.push(...m(ctx, client));
   return cleanups;
 }

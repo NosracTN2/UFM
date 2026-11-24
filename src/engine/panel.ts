@@ -7,6 +7,7 @@ import type { Familiar, GameState, Order, Settings } from "../shared/types";
 import { makeCtx } from "./context";
 import { applyOps } from "./ops";
 import { parseLine } from "./parse";
+import "./replay";
 
 export function dryRun(state: GameState, settings: Settings, lines: string[]): { ok: boolean; reason: string | null } {
   const copy: GameState = structuredClone(state);

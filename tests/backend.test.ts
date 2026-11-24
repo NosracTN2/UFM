@@ -82,7 +82,9 @@ describe("backend with a fake host", () => {
     expect(injected.role).toBe("system");
     expect(injected.content).toContain("[UFM STATE]");
     expect(injected.content).toContain("Shale");
-    expect(injected.content).toContain("Shale — guard the shaft");
+    // A Puppet Golem has no mind: the order is rejected, and the narrator is told it didn't happen.
+    expect(injected.content).toContain("REJECTED");
+    expect(injected.content).toContain('order Shale guard "the shaft" — Shale has no mind');
     expect(injected.content).toContain("[UFM TAG]");
     expect(msgsOut[1].content).not.toContain("ufm-setup");
     expect(msgsOut[msgsOut.length - 1].content).toBe("What now?");

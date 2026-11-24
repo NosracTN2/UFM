@@ -43,7 +43,11 @@ describe("panel checks and orders", () => {
     const r = run(chat([{ role: "assistant", swipes: [[`form name="Pebble" form=puppet\nform name="Grit" form=puppet`]] }]));
     const st = r.state;
     const pebble = st.roster[0];
+    // Puppets can't take orders (no mind); make them Automated Golems for the order checks.
+    expect(() => buildOrder(st, S, { kind: "order", famId: pebble.id, verb: "guard", target: "x" })).toThrow("no mind");
     expect(buildOrder(st, S, { kind: "hand", famId: pebble.id }).expect).toBe('hand "Pebble"');
+    for (const f of st.roster) f.form = "automated";
+    expect(() => buildOrder(st, S, { kind: "hand", famId: pebble.id })).toThrow("only a Puppet Golem");
     expect(buildOrder(st, S, { kind: "order", famId: pebble.id, verb: "guard", target: "the cave mouth" }).expect).toBe('order "Pebble" guard "the cave mouth"');
     expect(buildOrder(st, S, { kind: "slumber", famId: pebble.id }).expect).toBe('slumber "Pebble"');
     expect(buildOrder(st, S, { kind: "rename", famId: pebble.id, name: "Stone" }).expect).toBe('rename "Pebble" "Stone"');

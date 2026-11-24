@@ -35,7 +35,7 @@ export function addPanelNotice(fn: PanelNotice): void {
   notices.push(fn);
 }
 
-export function createPanel(ctx: SpindleFrontendContext, client: Client, actions: { openSetup: () => void; openLevelUp: () => void }) {
+export function createPanel(ctx: SpindleFrontendContext, client: Client, actions: { openSetup: () => void; openLevelUp: () => void; fixLast: () => void }) {
   const ps: PanelState = {
     tab: "roster",
     filter: "all",
@@ -398,6 +398,7 @@ export function createPanel(ctx: SpindleFrontendContext, client: Client, actions
     return h(
       "div",
       { class: "ufl-root", style: { padding: "0" } },
+      h("div", { class: "ufl-row" }, h("span", { class: "ufl-grow ufl-sub" }, "What the ledger took from the last reply."), button("Fix this reply…", actions.fixLast, { kind: "small", title: "Add a tag line the narrator missed (rolls back with this reply)" })),
       section("Applied", last.applied.length ? h("ul", { class: "ufl-list" }, last.applied.map((l) => h("li", { class: "ufl-code" }, l))) : h("div", { class: "ufl-sub" }, "Nothing changed.")),
       last.notes.length ? section("Ledger notes", h("ul", { class: "ufl-list" }, last.notes.map((n) => h("li", null, n)))) : null,
       last.events.length ? section("System", last.events.map((e) => h("div", { class: `ufl-event${e.big ? " big" : ""}` }, e.text))) : null,

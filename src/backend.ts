@@ -7,6 +7,7 @@ import { can, errText, log } from "./backend/sp";
 import { loadChat, saveLog } from "./backend/store";
 import { ingestMessage, removeMessage, scheduleResync, type MsgLike } from "./backend/sync";
 import { registerPhaseModules } from "./backend/modules";
+import { replyTexts } from "./backend/check";
 
 declare const spindle: SpindleAPI;
 
@@ -83,6 +84,10 @@ spindle.on("CHAT_SWITCHED", (p: any, userId?: string) => {
 spindle.on("GENERATION_ENDED", (p: any, userId?: string) => {
   track(p?.chatId, userId);
   if (!p?.chatId || p.error) return;
+  if (p.messageId && typeof p.content === "string") {
+    replyTexts.set(p.messageId, p.content);
+    if (replyTexts.size > 200) replyTexts.delete(replyTexts.keys().next().value!);
+  }
   void loadChat(p.chatId).then(async (c) => {
     // With chat_mutation the host read is exact (a new swipe must not overwrite an old slot).
     if (!can("chat_mutation") && p.messageId && typeof p.content === "string") {

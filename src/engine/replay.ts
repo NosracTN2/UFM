@@ -9,6 +9,9 @@ import { applyOps } from "./ops";
 import { parseBlock, parseLine } from "./parse";
 import { applySetup, initialState, type SetupData } from "./state";
 import { PLAYER_EVENT_HANDLERS } from "./player-events";
+import { installRules } from "./rules";
+
+installRules();
 
 export const DEFAULT_SETTINGS: Settings = {
   narrowTether: true,
