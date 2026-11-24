@@ -1,7 +1,7 @@
 // Text the narrator sees: a compact state block, standing orders and System events.
 
 import { ATTR_KEYS, ATTR_SHORT, FORMS, masteryName, PILLARS, soulStage } from "../shared/data";
-import { circleName, fmt, thresholdName, xpToNext } from "../shared/math";
+import { circleName, fmt, thresholdName, thresholdsCrossed, xpToNext } from "../shared/math";
 import type { Familiar, GameState, MsgResult, Order } from "../shared/types";
 import { derive } from "./derive";
 
@@ -35,7 +35,13 @@ function famLine(state: GameState, f: Familiar): string {
   else if (def(f)?.control === "hand") parts.push("stands still unless guided by hand");
   if (f.stance) parts.push(`stance: ${f.stance}`);
   if (f.resonance !== "none") parts.push(`${f.resonance} resonance`);
+  if (f.kind !== "beast" && f.stage && f.kind !== "elemental") parts.push(f.kind === "vampire" ? `${f.stage} rank` : f.stage);
+  if (f.kind === "elemental" && f.stage && f.stage !== "plain") parts.push(`${f.stage} core`);
+  if (f.path) parts.push(f.path);
+  if (f.mutations.length) parts.push(`mutations: ${f.mutations.join(", ")}`);
+  if (f.echoes.length) parts.push(`Echoes: ${f.echoes.join(", ")}`);
   if (f.wounds.length) parts.push(`hurt: ${f.wounds.map((w) => w.label).join(", ")}`);
+  if (f.ready) parts.push(`READY to change (${f.ready.label}) — only when the player triggers it`);
   parts.push(`${f.tether} tether${f.tether === 1 ? "" : "s"}`);
   return `- ${parts.join(" · ")}`;
 }
@@ -92,6 +98,10 @@ export function renderState(state: GameState): string {
   const arts = Object.entries(s.arts).filter(([, v]) => v === "learned");
   if (arts.length) lines.push(`Tether arts learned: ${arts.map(([k]) => k.replace(/_/g, " ")).join(", ")}`);
   if (s.borrowed.length) lines.push(`Borrowed traits: ${s.borrowed.map((b) => b.trait).join(", ")}`);
+  const slots = Math.max(0, Math.floor(s.branchProgress) - s.branchesEarned);
+  if (slots) lines.push(`Branch slots open: ${slots} (name a new Branch with the branch op only when the player earns one in the story)`);
+  const artsOpen = Math.max(0, thresholdsCrossed(s.level) - Object.values(s.arts).filter((v) => v === "learned").length);
+  if (artsOpen) lines.push(`Tether arts waiting: ${artsOpen} (one is learned in a story moment that fits: art "Name")`);
 
   const hand = s.hand ? state.roster.find((f) => f.id === s.hand) : null;
   if (hand) {

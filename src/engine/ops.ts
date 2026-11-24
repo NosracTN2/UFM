@@ -2,7 +2,7 @@
 // an illegal line throws Reject and the rest of the block still applies.
 
 import { ATTR_KEYS, formDef, FORMS, pillarDef, REGEN_HP_PER_HOUR, REGEN_MANA_PER_HOUR, soulStage, type FormDef } from "../shared/data";
-import { fmt } from "../shared/math";
+import { fmt, rate as rateOf } from "../shared/math";
 import type { AttrKey, Attrs, Familiar, Op, Wound } from "../shared/types";
 import { clean, type Ctx, findFam, isSelf, needFam, reject, Reject } from "./context";
 import { clampVitals, derive, fullRestore } from "./derive";
@@ -118,6 +118,7 @@ export function blankFamiliar(): Omit<Familiar, "id" | "name" | "pillar" | "kind
     xpSent: 0,
     fuel: {},
     ready: null,
+    path: null,
     traits: [],
     mutations: [],
     echoes: [],
@@ -374,6 +375,7 @@ function makeFamiliar(op: Op, ctx: Ctx, verb: string): void {
     floor: st.world.floor,
     notes: op.kv.note ?? "",
   };
+  if (minded && f.level > 1) for (let l = 2; l <= f.level; l++) f.unspent += rateOf(l);
   st.sheet.mana -= plan.mana;
   st.roster.push(f);
   ctx.note(`${f.name}: ${plan.def.label}${plan.mana ? `, ${plan.mana} Mana` : ""}, ${plan.tether} tether${plan.tether === 1 ? "" : "s"}`);

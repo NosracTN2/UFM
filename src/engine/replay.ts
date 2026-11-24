@@ -10,6 +10,8 @@ import { parseBlock, parseLine } from "./parse";
 import { applySetup, initialState, type SetupData } from "./state";
 import { PLAYER_EVENT_HANDLERS } from "./player-events";
 import { installRules } from "./rules";
+import "./growth";
+import { onSetup } from "./growth-hooks";
 
 installRules();
 
@@ -54,6 +56,7 @@ export function replay(log: ChatLog, player: PlayerStore, settings: Settings, op
   if (setup) {
     applySetup(state, setup.data as SetupData);
     fullRestore(state);
+    onSetup(makeCtx(state, settings, startRes));
   }
   for (const ev of player.events.filter((e) => e.anchor == null && e.kind !== "setup").sort((a, b) => a.ts - b.ts)) {
     applyPlayerEvent(ev, makeCtx(state, settings, startRes));

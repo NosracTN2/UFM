@@ -96,6 +96,8 @@ export interface Familiar {
   fuel: Record<string, number>;
   /** Set when fuel crosses a line; waits for you to trigger the change in the story. */
   ready: { label: string; options: string[] } | null;
+  /** The evolution path taken (bigger monstrous form, humanoid shifter form...). */
+  path: string | null;
   traits: string[];
   mutations: string[];
   echoes: string[];
@@ -141,6 +143,8 @@ export interface Sheet {
   branches: Branch[];
   /** Branch slots consumed beyond the starting set (Origin and spread). */
   branchesEarned: number;
+  /** Fractional progress toward the next Branch slot (one per levelsPerBranch levels). */
+  branchProgress: number;
   gifts: Gift[];
   borrowed: { familiarId: string; trait: string }[];
   arts: Record<string, "locked" | "learned">;

@@ -61,6 +61,7 @@ export function emptySheet(): Sheet {
     pillars,
     branches: [],
     branchesEarned: 0,
+    branchProgress: 0,
     gifts: [],
     borrowed: [],
     arts,

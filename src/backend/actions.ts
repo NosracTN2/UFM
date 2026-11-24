@@ -1,6 +1,7 @@
 // Phase 2: panel actions become standing orders; setup writes the starting sheet; squads; card install.
 
 import { ActionError, buildOrder, famChecks, formOptions, type Action } from "../engine/panel";
+import "../engine/growth-panel";
 import type { SetupData } from "../engine/state";
 import { buildCard, RULE_ENTRIES } from "../shared/card";
 import { BIRTHPLACES, birthplaceDef, levelsPerBranch, pillarDef, RARITIES, rarityDef, STARTER_POOL } from "../shared/data";
@@ -28,7 +29,7 @@ export function registerActions(): void {
     return {
       formOptions: formOptions(st, settings),
       famChecks: famChecks(st, settings),
-      elements: st.sheet.branches.filter((b) => b.pillar === "elemental").map((b) => b.name),
+      elements: st.sheet.branches.filter((b) => b.pillar === "elemental" || b.cross?.includes("elemental")).map((b) => b.name),
       branchRate: levelsPerBranch(st.sheet.run, st.sheet.rarity, held),
       rolls: c.player.rolls ?? {},
     };
