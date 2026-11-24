@@ -24,7 +24,7 @@ function mapText(m: LlmMessageDTO, fn: (s: string) => string): LlmMessageDTO {
 }
 
 /** Extra prompt sections contributed by later phases (NPC news, cutaway permission...). */
-type Extra = (c: ChatCache, r: ReplayResult, ctx: InterceptorContextDTO) => string[] | Promise<string[]>;
+type Extra = (c: ChatCache, r: ReplayResult, ctx: InterceptorContextDTO, messages: LlmMessageDTO[]) => string[] | Promise<string[]>;
 const extras: Extra[] = [];
 export function addPromptExtra(fn: Extra): void {
   extras.push(fn);
@@ -102,7 +102,7 @@ export async function intercept(messages: LlmMessageDTO[], context: InterceptorC
     const extraLines: string[] = [];
     for (const fn of extras) {
       try {
-        extraLines.push(...(await fn(c, result, context)));
+        extraLines.push(...(await fn(c, result, context, out)));
       } catch (e) {
         log("warn", `prompt extra failed: ${errText(e)}`);
       }

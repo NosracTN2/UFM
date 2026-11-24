@@ -294,7 +294,7 @@ export interface PlayerStore {
   /** msgKey (msgId#swipe) -> second-model suggestions. */
   suggestions: Record<string, Suggestion[]>;
   /** NPC/faction offscreen updates produced by background passes, keyed by msgKey. */
-  offscreen: Record<string, { npc: string; text: string }[]>;
+  offscreen: Record<string, { npc: string; text: string; kind?: string }[]>;
   /** Voice sheets written the first time an NPC speaks (npc id -> note). */
   voices: Record<string, string>;
   /** Setup rolls, kept so closing the window can't reroll (unless rerolls are on). */
@@ -336,6 +336,7 @@ export type GameEventKind =
   | "reveal"
   | "lost"
   | "healed"
+  | "world"
   | "info";
 
 export interface GameEvent {

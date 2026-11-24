@@ -12,6 +12,7 @@ import { PLAYER_EVENT_HANDLERS } from "./player-events";
 import { installRules } from "./rules";
 import "./growth";
 import { onSetup } from "./growth-hooks";
+import { applyOffscreen } from "./world";
 
 installRules();
 
@@ -82,6 +83,8 @@ export function replay(log: ChatLog, player: PlayerStore, settings: Settings, op
       for (const body of bodies) applyOps(ctx, parseBlock(body));
     }
     for (const ev of (anchored.get(key) ?? []).sort((a, b) => a.ts - b.ts)) applyPlayerEvent(ev, ctx);
+    const off = player.offscreen?.[key];
+    if (off?.length) applyOffscreen(ctx, off);
     clampVitals(state);
     if (m.role === "assistant") last = res;
     if (m.role === "assistant" || res.applied.length || res.rejected.length || res.events.length) results.push(res);

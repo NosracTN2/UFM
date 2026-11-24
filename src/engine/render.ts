@@ -1,6 +1,7 @@
 // Text the narrator sees: a compact state block, standing orders and System events.
 
-import { ATTR_KEYS, ATTR_SHORT, FORMS, masteryName, PILLARS, soulStage } from "../shared/data";
+import { ATTR_KEYS, ATTR_SHORT, FACTIONS, floorBand, FORMS, masteryName, PILLARS, soulStage } from "../shared/data";
+import { heat } from "./world";
 import { circleName, fmt, thresholdName, thresholdsCrossed, xpToNext } from "../shared/math";
 import type { Familiar, GameState, MsgResult, Order } from "../shared/types";
 import { derive } from "./derive";
@@ -74,6 +75,8 @@ export function renderState(state: GameState): string {
     `Attributes: ${ATTR_KEYS.map((k) => `${ATTR_SHORT[k]} ${d.attrs[k]}${d.bonds[k] ? ` (${d.own[k]} own + ${d.bonds[k]} from bonds)` : ""}`).join(" · ")}${s.unspent ? ` · ${s.unspent} unspent point(s), the player places them` : ""}`,
   );
   const clock = w.clocks[String(w.floor)];
+  const band = floorBand(w.floor);
+  lines.push(`Floor ${w.floor} enemy band: Level ${band.min}–${band.max} (Guardian at the top; Faction climbers bring their own level)`);
   lines.push(`Where: Floor ${w.floor}${w.place ? `, ${w.place}` : ""} · ${clockText(clock?.hours ?? 8)}${clock?.weather ? ` · ${clock.weather}` : ""}`);
   const body: string[] = s.wounds.map(woundText);
   if (s.exhaustion) body.push(`exhaustion ${s.exhaustion}/5`);
@@ -120,6 +123,9 @@ export function renderState(state: GameState): string {
   if (sleeping.length) lines.push(`Slumbering (0 tethers, woken by touch): ${sleeping.map((f) => `${f.name}${f.place ? ` at ${f.place}` : ""}`).join(", ")}`);
   if (gone.length) lines.push(`Gone (never use them): ${gone.map((f) => `${f.name} (${f.state})`).join(", ")}`);
   if (s.items.length) lines.push(`Carrying: ${s.items.map((i) => (i.qty > 1 ? `${i.name} ×${i.qty}` : i.name)).join(", ")}`);
+  const ht = heat(state);
+  const hot = Object.entries(ht.byFaction).filter(([, v]) => v > 0);
+  if (hot.length || ht.decree00) lines.push(`Heat (from what they know): ${hot.map(([k, v]) => `${FACTIONS.find((f) => f.id === k)?.name ?? k} ${v}`).join(" · ") || "none"}${ht.decree00 ? ` · Decree 00 pressure ${ht.decree00}` : ""}`);
   const threads = w.threads.filter((t) => t.open);
   if (threads.length) lines.push(`Open threads: ${threads.map((t) => t.text).join("; ")}`);
   lines.push(STATE_CLOSE);
@@ -142,7 +148,7 @@ export function renderOrders(state: GameState, fresh: Order[]): string {
 export function renderSystem(last: MsgResult | null, extra: string[] = []): string {
   const out: string[] = [];
   if (last) {
-    const ev = last.events.filter((e) => e.kind !== "info" || e.big);
+    const ev = last.events.filter((e) => (e.kind !== "info" || e.big) && !e.text.startsWith("__"));
     if (ev.length) {
       out.push("The extension computed these from your last change log. Show them in the story at the right moment, as System windows (blockquotes) where it fits. Use these exact numbers:");
       for (const e of ev) out.push(`- ${e.big ? "MAJOR: " : ""}${e.text}`);

@@ -7,6 +7,7 @@ import { createPanel } from "./panel";
 import { installCheckUi, manualFix } from "./checks";
 import { mountSettings } from "./settings";
 import { installGrowthUi } from "./growth";
+import { installWorldUi, mountWorldUi } from "./world";
 import { openSetup } from "./setup";
 
 export const uiActions = {
@@ -46,6 +47,7 @@ export function mountPhaseUi(ctx: SpindleFrontendContext, client: Client): (() =
   // The panel: right-edge dock (a bottom sheet on mobile); a drawer tab if ui_panels isn't granted.
   installCheckUi(ctx);
   installGrowthUi(ctx);
+  installWorldUi();
   const panel = createPanel(ctx, client, { openSetup: uiActions.openSetup, openLevelUp: uiActions.openLevelUp, fixLast: () => void manualFix(ctx, client) });
   let dock: ReturnType<SpindleFrontendContext["ui"]["requestDockPanel"]> | null = null;
   try {
@@ -103,6 +105,7 @@ export function mountPhaseUi(ctx: SpindleFrontendContext, client: Client): (() =
   }
 
   cleanups.push(...mountSettings(ctx, client));
+  cleanups.push(...mountWorldUi(ctx, client));
   for (const m of mounts) cleanups.push(...m(ctx, client));
   return cleanups;
 }

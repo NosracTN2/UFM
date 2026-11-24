@@ -49,7 +49,8 @@ export const TAG_OPS: { group: string; lines: string[] }[] = [
     lines: [
       'learn who="The Staff" fact="raises golems from stone" via=told|overheard|seen',
       'see enemy="Staff warden" level=17 class="Warden" lineage="Human" rarity=Common',
-      'npc name="Halvard" faction="The Staff" voice="clipped, dry" goal="find the golem-maker" | npc Halvard wound="lost an eye"',
+      'npc name="Halvard" faction="The Staff" voice="clipped, dry" goal="find the golem-maker"   (voice= the first time they speak)',
+      'npc Halvard wound="lost an eye" | npc Halvard grudge="..." | npc Halvard dead=yes | npc Halvard seen=yes (after showing what changed)',
       'time +1 day | time +6h | move floor=2 place="the gate town" | weather "cold rain"',
       'thread "Registry deadline" | thread close "Registry deadline"',
     ],

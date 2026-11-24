@@ -111,7 +111,7 @@ export function buildView(
   const recentEvents: LedgerView["recentEvents"] = [];
   for (const r of result.results.slice(-8)) {
     for (const x of r.rejected) recentRejected.push({ key: r.key, line: x.line, reason: x.reason });
-    for (const e of r.events) recentEvents.push({ key: r.key, text: e.text, big: e.big });
+    for (const e of r.events) if (!e.text.startsWith("__")) recentEvents.push({ key: r.key, text: e.text, big: e.big });
   }
   const suggestions = Object.entries(player.suggestions)
     .map(([key, items]) => ({ key, items: items.filter((i) => i.status === "open") }))
