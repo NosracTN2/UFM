@@ -176,13 +176,25 @@ export function permsSnapshot(): Record<string, boolean> {
 
 export function makeView(c: ChatCache, settings: Parameters<typeof buildView>[3]): LedgerView | null {
   if (!c.result) return null;
-  return buildView(c.chatId, c.result, c.player, settings, permsSnapshot(), viewExtras(c));
+  return buildView(c.chatId, c.result, c.player, settings, permsSnapshot(), viewExtras(c, settings));
 }
 
 /** Later phases add panel data here (form options, ledger, NPCs...). */
-export let viewExtras: (c: ChatCache) => Record<string, unknown> = () => ({});
-export function setViewExtras(fn: typeof viewExtras): void {
-  viewExtras = fn;
+type Extras = (c: ChatCache, settings: Parameters<typeof buildView>[3]) => Record<string, unknown>;
+const extraFns: Extras[] = [];
+export function viewExtras(c: ChatCache, settings: Parameters<typeof buildView>[3]): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const fn of extraFns) {
+    try {
+      Object.assign(out, fn(c, settings));
+    } catch (e) {
+      log("warn", `view extras failed: ${errText(e)}`);
+    }
+  }
+  return out;
+}
+export function addViewExtras(fn: Extras): void {
+  extraFns.push(fn);
 }
 
 export function pushView(c: ChatCache, settings: Parameters<typeof buildView>[3]): void {

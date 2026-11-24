@@ -43,6 +43,15 @@ export class Client {
     this.handlers.get(type)!.push(fn);
   }
 
+  subscribeMsg(type: string, fn: (msg: any) => void): () => void {
+    this.on(type, fn);
+    return () => {
+      const list = this.handlers.get(type) ?? [];
+      const i = list.indexOf(fn);
+      if (i >= 0) list.splice(i, 1);
+    };
+  }
+
   receive(msg: any): void {
     if (!msg || typeof msg.type !== "string") return;
     if (msg.type === "state" && msg.chatId && msg.view) {

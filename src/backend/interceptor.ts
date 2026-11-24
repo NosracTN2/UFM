@@ -7,7 +7,7 @@ import { renderOrders, renderState, renderSystem, STATE_CLOSE, STATE_OPEN, TAG_R
 import type { Order, ReplayResult } from "../shared/types";
 import { errText, log } from "./sp";
 import { type ChatCache, getSettings, loadChat, savePlayer } from "./store";
-import { resyncNow, seedOf } from "./sync";
+import { recompute, resyncNow, seedOf } from "./sync";
 
 const UFM_BLOCK_RE = /<ufm\b[^>]*>[\s\S]*?<\/ufm>/gi;
 const SETUP_TAG_RE = /<ufm-setup\b[^>]*>[\s\S]*?<\/ufm-setup>/gi;
@@ -30,10 +30,20 @@ export function addPromptExtra(fn: Extra): void {
   extras.push(fn);
 }
 
-/** Commands from the panel that belong to this generation. */
-export function freshOrders(c: ChatCache, lastUserId: string | null): Order[] {
-  const issued = lastUserId ? (c.player.issued[lastUserId] ?? []) : [];
+/** Commands from the panel that belong to this generation. Issued orders only re-apply while the
+ *  prompt ends on the user turn they were sent with (a regenerate or swipe), never on a later turn. */
+export function freshOrders(c: ChatCache, lastUserId: string | null, endsOnUser: boolean): Order[] {
+  const issued = lastUserId && endsOnUser ? (c.player.issued[lastUserId] ?? []) : [];
   return [...issued, ...c.player.pending];
+}
+
+/** Bind queued orders to the user message they were sent with. A line deleted from the composer cancels its order. */
+async function bindPending(c: ChatCache, lastUserId: string, lastUserText: string): Promise<void> {
+  if (!c.player.pending.length) return;
+  const keep = c.player.pending.filter((o) => !o.inComposer || lastUserText.includes(o.line.trim()));
+  c.player.issued[lastUserId] = [...(c.player.issued[lastUserId] ?? []), ...keep];
+  c.player.pending = [];
+  await savePlayer(c);
 }
 
 export async function intercept(messages: LlmMessageDTO[], context: InterceptorContextDTO): Promise<LlmMessageDTO[] | InterceptorResultDTO> {
@@ -81,7 +91,14 @@ export async function intercept(messages: LlmMessageDTO[], context: InterceptorC
       return mm;
     });
 
-    const fresh = freshOrders(c, lastUser);
+    const lastHist = hist[hist.length - 1];
+    const endsOnUser = !!lastHist && lastHist.role === "user";
+    if (!context.isDryRun && lastUser && endsOnUser && c.player.pending.length) {
+      const userText = text(hist.filter((m) => m.sourceMessageId === lastUser).at(-1)!);
+      await bindPending(c, lastUser, userText);
+      void recompute(c);
+    }
+    const fresh = freshOrders(c, lastUser, endsOnUser);
     const extraLines: string[] = [];
     for (const fn of extras) {
       try {

@@ -121,6 +121,10 @@ onFront("alloc", async (msg, c, userId) => {
   await addPlayerEvent(c, "alloc", { points });
 });
 
+onFront("toast", (msg, _c, userId) => {
+  if (typeof msg.text === "string" && msg.text) toast("info", msg.text.slice(0, 300), userId);
+});
+
 onFront("settings_get", async (_m, _c, userId) => {
   reply(userId, { type: "settings", settings: await getSettings() });
 });

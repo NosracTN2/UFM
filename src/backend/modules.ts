@@ -1,3 +1,7 @@
-// Feature modules added by later phases register their protocol handlers and hooks here.
+// Feature modules register their protocol handlers and hooks here.
 
-export function registerPhaseModules(): void {}
+import { registerActions } from "./actions";
+
+export function registerPhaseModules(): void {
+  registerActions();
+}

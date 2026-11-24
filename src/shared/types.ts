@@ -254,6 +254,8 @@ export interface PlayerEvent {
 
 export interface Order {
   id: string;
+  /** Set once the frontend put the line into the composer; if the sent message lacks it, the order was cancelled. */
+  inComposer?: boolean;
   kind: string;
   /** Human line added to your message. */
   line: string;
@@ -291,6 +293,9 @@ export interface PlayerStore {
   offscreen: Record<string, { npc: string; text: string }[]>;
   /** Voice sheets written the first time an NPC speaks (npc id -> note). */
   voices: Record<string, string>;
+  /** Setup rolls, kept so closing the window can't reroll (unless rerolls are on). */
+  rolls?: Record<string, string>;
+  rollCount?: number;
 }
 
 export interface Settings {

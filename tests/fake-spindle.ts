@@ -7,7 +7,17 @@ export interface FakeMsg {
   swipe_id: number;
 }
 
-export function installFakeSpindle(opts: { perms?: string[] } = {}) {
+const ALL_PERMS = ["interceptor", "generation", "chat_mutation", "ui_panels", "characters", "world_books", "image_gen", "images", "decisions"];
+
+/** One fake per test process: Bun shares the module cache across test files, so the backend registers once. */
+export function installFakeSpindle(opts: { perms?: string[] } = {}): ReturnType<typeof createFake> {
+  const g = globalThis as any;
+  if (g.__ufmFake) return g.__ufmFake;
+  g.__ufmFake = createFake(opts);
+  return g.__ufmFake;
+}
+
+function createFake(opts: { perms?: string[] }) {
   const files = new Map<string, unknown>();
   const chats = new Map<string, FakeMsg[]>();
   const chatVars = new Map<string, Record<string, string>>();
@@ -17,7 +27,7 @@ export function installFakeSpindle(opts: { perms?: string[] } = {}) {
   let interceptor: any = null;
   const macros = new Map<string, any>();
   let frontendHandler: any = null;
-  const perms = new Set(opts.perms ?? ["interceptor", "generation", "chat_mutation", "ui_panels"]);
+  const perms = new Set(opts.perms ?? ALL_PERMS);
   const generated: any[] = [];
 
   const spindle: any = {
