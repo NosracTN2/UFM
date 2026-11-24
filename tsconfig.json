@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noEmit": true,
+    "outDir": "./dist",
+    "declaration": false,
+    "skipLibCheck": true,
+    "types": ["bun"]
+  },
+  "include": ["src", "tests"]
+}
