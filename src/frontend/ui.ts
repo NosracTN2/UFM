@@ -8,6 +8,8 @@ import { installCheckUi, manualFix } from "./checks";
 import { mountSettings } from "./settings";
 import { installGrowthUi } from "./growth";
 import { installWorldUi, mountWorldUi } from "./world";
+import { installCanonSettings } from "./canon";
+import { mountHud } from "./hud";
 import { openSetup } from "./setup";
 
 export const uiActions = {
@@ -104,8 +106,15 @@ export function mountPhaseUi(ctx: SpindleFrontendContext, client: Client): (() =
     /* input bar unavailable */
   }
 
+  cleanups.push(...installCanonSettings(ctx, client));
   cleanups.push(...mountSettings(ctx, client));
   cleanups.push(...mountWorldUi(ctx, client));
+  cleanups.push(
+    ...mountHud(ctx, client, () => {
+      if (dock?.isCollapsed()) dock.expand();
+      client.refreshActive(true);
+    }),
+  );
   for (const m of mounts) cleanups.push(...m(ctx, client));
   return cleanups;
 }

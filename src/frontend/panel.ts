@@ -8,6 +8,7 @@ import { ORDER_VERBS, STANCES } from "../shared/data";
 import type { Client } from "./client";
 import { bar, button, clear, empty, fmt, h, input, section, select } from "./dom";
 import { promptText } from "./widgets";
+import { portraitMenu } from "./portraits";
 
 type Tab = "roster" | "form" | "squads" | "turn";
 type Filter = "all" | "active" | "slumbering" | "soul" | "lost" | "released";
@@ -54,7 +55,12 @@ export function createPanel(ctx: SpindleFrontendContext, client: Client, actions
     clear(root);
     const v = client.view;
     if (!client.activeChat) {
-      root.append(empty("Open a chat to command your familiars."));
+      root.append(
+        empty(
+          "Open a chat with the Ultimate Familiar Mastery narrator to command your familiars.",
+          button("Install the narrator card", () => ctx.sendToBackend({ type: "install_card" })),
+        ),
+      );
       return;
     }
     if (!v) {
@@ -191,7 +197,10 @@ export function createPanel(ctx: SpindleFrontendContext, client: Client, actions
     const checks = (v.extras.famChecks as Record<string, FamChecks> | undefined)?.[f.id];
     const gone = f.state === "lost" || f.state === "released";
     const initials = f.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-    const portrait = f.portrait ? h("img", { class: "ufl-portrait", src: f.portrait, alt: f.name }) : h("div", { class: "ufl-portrait" }, initials);
+    const onPortrait = (e: MouseEvent) => void portraitMenu(ctx, client, f, e);
+    const portrait = f.portrait
+      ? h("img", { class: "ufl-portrait", src: f.portrait, alt: f.name, title: "Portrait: generate, upload or remove", style: { cursor: "pointer" }, onclick: onPortrait })
+      : h("div", { class: "ufl-portrait", title: "Add a portrait", style: { cursor: "pointer" }, onclick: onPortrait }, initials);
     const meta: string[] = [f.label];
     if (f.minded && f.level) meta.push(`Lv ${f.level}`);
     if (f.resonance !== "none") meta.push(`${f.resonance} resonance`);

@@ -14,6 +14,7 @@ export function addSettingsSection(fn: SettingsSection): void {
 export interface Conns {
   llm: { id: string; name: string }[];
   decision: { id: string; name: string }[];
+  image: { id: string; name: string }[];
 }
 
 export function toggle(label: string, help: string, on: boolean, onChange: (v: boolean) => void): HTMLElement {
@@ -28,7 +29,7 @@ export function toggle(label: string, help: string, on: boolean, onChange: (v: b
 export function mountSettings(ctx: SpindleFrontendContext, client: Client): (() => void)[] {
   const root = h("div", { class: "ufl-root" });
   const cleanups: (() => void)[] = [];
-  let conns: Conns = { llm: [], decision: [] };
+  let conns: Conns = { llm: [], decision: [], image: [] };
   try {
     if (ctx.ui.registerSettingsTab) {
       const tab = ctx.ui.registerSettingsTab({
@@ -56,7 +57,7 @@ export function mountSettings(ctx: SpindleFrontendContext, client: Client): (() 
   };
   cleanups.push(
     client.subscribeMsg("connections", (m) => {
-      conns = { llm: m.llm ?? [], decision: m.decision ?? [] };
+      conns = { llm: m.llm ?? [], decision: m.decision ?? [], image: m.image ?? [] };
       render();
     }),
   );
@@ -70,6 +71,11 @@ export function mountSettings(ctx: SpindleFrontendContext, client: Client): (() 
       return;
     }
     root.append(
+      section(
+        "Narrator card",
+        h("div", { class: "ufl-sub" }, "Creates the “Ultimate Familiar Mastery” character (the Tower) with its rules world book. Needs the “characters” permission (and “world_books” for the book). You can also import card/ufm-narrator.json by hand."),
+        h("div", { class: "ufl-row" }, h("button", { type: "button", class: "ufl-btn", onclick: () => ctx.sendToBackend({ type: "install_card" }) }, "Install the narrator card")),
+      ),
       section(
         "Rules",
         toggle("Narrow tether (Origin runs)", "Below Level 15 most kill XP spills: a random 10–30% reaches you, revealed at the First Threshold.", s.narrowTether, (v) => set({ narrowTether: v })),

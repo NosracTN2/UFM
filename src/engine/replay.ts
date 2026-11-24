@@ -91,6 +91,10 @@ export function replay(log: ChatLog, player: PlayerStore, settings: Settings, op
     if (opts.until && m.id === opts.until) break;
   }
   if (startRes.applied.length || startRes.rejected.length || startRes.events.length) results.unshift(startRes);
+  for (const f of state.roster) {
+    const p = player.portraits?.[f.id];
+    if (p && (p.form === f.form || p.name === f.name)) f.portrait = p.url;
+  }
   return { state, results, last };
 }
 

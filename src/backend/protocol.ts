@@ -129,8 +129,22 @@ onFront("settings_get", async (_m, _c, userId) => {
   reply(userId, { type: "settings", settings: await getSettings() });
 });
 
+type SettingsHook = (patch: Partial<Settings>, userId: string) => Promise<void> | void;
+const settingsHooks: SettingsHook[] = [];
+export function onSettingsChanged(h: SettingsHook): void {
+  settingsHooks.push(h);
+}
+
 onFront("settings_set", async (msg, c, userId) => {
-  const s = await updateSettings((msg.patch ?? {}) as Partial<Settings>);
+  const patch = (msg.patch ?? {}) as Partial<Settings>;
+  const s = await updateSettings(patch);
   reply(userId, { type: "settings", settings: s });
   if (c) await recompute(c);
+  for (const h of settingsHooks) {
+    try {
+      await h(patch, userId);
+    } catch (e) {
+      log("warn", `settings hook failed: ${errText(e)}`);
+    }
+  }
 });

@@ -300,6 +300,8 @@ export interface PlayerStore {
   /** Setup rolls, kept so closing the window can't reroll (unless rerolls are on). */
   rolls?: Record<string, string>;
   rollCount?: number;
+  /** Familiar portraits by familiar id (applied only while the familiar keeps that form). */
+  portraits?: Record<string, { url: string; form: string; name: string }>;
 }
 
 export interface Settings {

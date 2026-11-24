@@ -165,7 +165,12 @@ export function registerCheck(): void {
   });
 
   onFront("connections", async (_msg, _c, userId) => {
-    const out: { llm: { id: string; name: string }[]; decision: { id: string; name: string }[] } = { llm: [], decision: [] };
+    const out: { llm: { id: string; name: string }[]; decision: { id: string; name: string }[]; image: { id: string; name: string }[] } = { llm: [], decision: [], image: [] };
+    try {
+      if (can("image_gen")) out.image = ((await sp().imageGen.listConnections()) as unknown as { id: string; name: string }[]).map((x) => ({ id: x.id, name: x.name }));
+    } catch {
+      /* no image connections */
+    }
     try {
       if (can("generation")) out.llm = ((await sp().connections.list()) as { id: string; name: string; model?: string }[]).map((x) => ({ id: x.id, name: `${x.name}${x.model ? ` · ${x.model}` : ""}` }));
     } catch (e) {
